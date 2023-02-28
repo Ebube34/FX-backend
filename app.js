@@ -114,12 +114,12 @@ app.post("/register", function(req, res){
                 <div style="padding:4em 2em; background-color:white; border-radius:10px;">
                   <h2>Verify your email address</h2>
                   <p>We are exited to have you as an investor. In order to start using your account you need to confirm your email address. click on the link bellow </p>
-                    <a href=http://localhost:3000/confirm/${newUser.confirmationCode}> Click here</a>
+                    <a href=https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}> Click here</a>
                     <p>
                       Or copy the following link and paste in a new browser tab
                     </p>
                     <p>
-                      <a href=http://localhost:3000/confirm/${newUser.confirmationCode}>http://localhost:3000/confirm/${newUser.confirmationCode}</a>
+                      <a href=https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}>https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}</a>
                     </p>
                     <div style="border-bottom:1px solid black; width:100%">
 
