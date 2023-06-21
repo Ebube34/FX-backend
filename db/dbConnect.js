@@ -1,5 +1,7 @@
-const mongoose = require("mongoose");
-require('dotenv').config();
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
+
 
 async function dbConnect(){
     mongoose.set('strictQuery', true);
@@ -15,4 +17,4 @@ async function dbConnect(){
     })
 }
 
-module.exports = dbConnect;
+export default dbConnect;
