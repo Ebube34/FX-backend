@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const DepositsSchema = new mongoose.Schema(
     {
         userId: String,
-        amount: Number,
+        amount: String,
         network: String,
         date: String,
         address: String,

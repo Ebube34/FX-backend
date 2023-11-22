@@ -258,6 +258,7 @@ app.post("/how/reset-password", function (req, res) {
                 message: "Successfully changed your password!",
                 userId: newUser._id,
                 name: newUser.firstName,
+                dateString
               });
             })
             .catch((err) => {
@@ -444,9 +445,13 @@ app.post("/deposits", (req, res) => {
   const dateString =
     strTime + " " + day.toString() + " " + editedMonth + ", " + year.toString();
 
+    const amountValue = details.amount;
+    const amountToString = amountValue.toString();
+    const amountWithUSD = "$" + amountToString;
+
   const deposit = new Deposits({
     userId: details.userId,
-    amount: details.amount,
+    amount: amountWithUSD,
     network: details.network,
     date: dateString,
     address: details.address,
@@ -514,6 +519,10 @@ app.post("/withdrawals", (req, res) => {
   const dateString =
     strTime + " " + day.toString() + " " + editedMonth + ", " + year.toString();
 
+    const amountValue = details.amount;
+    const amountToString = amountValue.toString();
+    const amountWithUSD = "$" + amountToString;
+
   User.findOne({ _id: details.userId })
     .then((user) => {
       if (user.walletBalance < details.amount) {
@@ -526,7 +535,7 @@ app.post("/withdrawals", (req, res) => {
           address: details.address,
           date: dateString,
           network: details.network,
-          amount: details.amount,
+          amount: amountWithUSD,
         });
 
         withdrawal
