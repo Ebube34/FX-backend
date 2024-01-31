@@ -96,25 +96,13 @@ app.post("/register", function (req, res) {
         err,
       });
     } else {
-      function lcfirst(string) {
-        if (!(typeof string !== "string")) {
-          return "";
-        }
-
-        if (string.length === 0) {
-          return string;
-        }
-
-        return string[0].toLowerCase() + string.slice(1);
-      }
-
-      const editedEmail = lcfirst(req.body.email);
+      
 
       const newUser = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         phoneNumber: req.body.phoneNumber,
-        email: editedEmail,
+        email: req.body.email,
         country: req.body.country,
         password: hash,
         confirmationCode: token,
