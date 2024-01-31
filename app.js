@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import User from "./db/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-// import nodemailer from "nodemailer";
+import nodemailer from "nodemailer";
 import cors from "cors";
 import Contract from "./db/contracts.js";
 import Deposits from "./db/transactionHistory.js";
@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // const companyPass = process.env.emailpassword;
 
 // const transport = nodemailer.createTransport({
-//   host: 'smtp.forwardemail.net',
+//   host: "smtp.forwardemail.net",
 //   port: 465,
 //   secure: true,
 //   auth: {
@@ -48,6 +48,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     pass: companyPass,
 //   },
 // });
+
+// transport.sendMail();
 
 app.get("/", (req, res, next) => {
   res.json({ message: "Hey! This is your server response!" });
@@ -94,11 +96,25 @@ app.post("/register", function (req, res) {
         err,
       });
     } else {
+      function lcfirst(string) {
+        if (!(typeof string !== "string")) {
+          return "";
+        }
+
+        if (string.length === 0) {
+          return string;
+        }
+
+        return string[0].toLowerCase() + string.slice(1);
+      }
+
+      const editedEmail = lcfirst(req.body.email);
+
       const newUser = new User({
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         phoneNumber: req.body.phoneNumber,
-        email: req.body.email,
+        email: editedEmail,
         country: req.body.country,
         password: hash,
         confirmationCode: token,
@@ -142,7 +158,7 @@ app.post("/register", function (req, res) {
           // });
 
           res.status(201).send({
-            message: "User Created succrssfully! please check your email",
+            message: "User Created succrssfully! you can now login",
           });
         }
       });
@@ -161,37 +177,6 @@ app.post("/login", function (req, res) {
               message: "Incorrect password",
             });
           } else {
-            // if (user.status != "Active") {
-            // transport.sendMail({
-            //   from: companyEmail,
-            //   to: newUser.email,
-            //   subject: "ACCOUNT VERIFICATION",
-            //   html: `            <div style="text-align:center; background-color:#024959; padding:2em 1em 3em 1em; ">
-            //       <h1 style="color:white">Hello ${newUser.firstName}</h1>
-
-            //       <div style="padding:4em 2em; background-color:white; border-radius:10px;">
-            //         <h2>Verify your email address</h2>
-            //         <p>We are exited to have you as an investor. In order to start using your account you need to confirm your email address. click on the link bellow </p>
-            //           <a href=https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}> Click here</a>
-            //           <p>
-            //             Or copy the following link and paste in a new browser tab
-            //           </p>
-            //           <p>
-            //             <a href=https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}>https://investmentfx.netlify.app/confirm/${newUser.confirmationCode}</a>
-            //           </p>
-            //           <div style="border-bottom:1px solid black; width:100%">
-
-            //           </div>
-            //           <p style="font-style:italic; font-size:1em">if you did not sign up for this account you can ignore this email and your account will be deleted.</p>
-            //       </div>
-            //   </div>`,
-            // });
-            //   return res.status(403).send({
-            //     message: "Pending Account. Please Verify Your Email!",
-            //   });
-            // }
-            
-
             res.status(200).send({
               message: "Login Successful",
               userId: user._id,
@@ -201,14 +186,14 @@ app.post("/login", function (req, res) {
         })
         .catch((errors) => {
           res.status(402).send({
-            message: "password does not match",
+            message: "Incorrect password",
             errors,
           });
         });
     })
     .catch((e) => {
       res.status(404).send({
-        message: "Not found try again",
+        message: "Email not found, please provide the correct details",
         e,
       });
     });
@@ -231,34 +216,35 @@ app.post("/how/reset-password", function (req, res) {
             .then((newUser) => {
               const dateObject = new Date();
 
-              
-  const day = dateObject.getDate();
-  const month = dateObject.getMonth();
-  const year = dateObject.getFullYear();
-  const editedDateObject = new Date(year, month, day);
-  const editedMonth = editedDateObject.toLocaleString("default", {
-    month: "short",
-  });
-  var hours = dateObject.getHours();
-  var minutes = dateObject.getMinutes();
-  var ampm = hours >= 12 ? "pm" : "am";
-  hours = hours % 12;
-  hours = hours ? hours : 12; 
-  minutes = minutes < 10 ? "0" + minutes : minutes;
-  var strTime = hours + ":" + minutes + "" + ampm;
+              const day = dateObject.getDate();
+              const month = dateObject.getMonth();
+              const year = dateObject.getFullYear();
+              const editedDateObject = new Date(year, month, day);
+              const editedMonth = editedDateObject.toLocaleString("default", {
+                month: "short",
+              });
+              var hours = dateObject.getHours();
+              var minutes = dateObject.getMinutes();
+              var ampm = hours >= 12 ? "pm" : "am";
+              hours = hours % 12;
+              hours = hours ? hours : 12;
+              minutes = minutes < 10 ? "0" + minutes : minutes;
+              var strTime = hours + ":" + minutes + "" + ampm;
 
-  const dateString =
-    strTime + " " + day.toString() + " " + editedMonth + ", " + year.toString();
-
-
-              //         transport.sendMail({
-              // Send user email about password reset if it wasent them contact support immdiately 
-
+              const dateString =
+                strTime +
+                " " +
+                day.toString() +
+                " " +
+                editedMonth +
+                ", " +
+                year.toString();
+              // Send user email about password reset if it wasent them they should contact support immediately
               res.status(200).send({
                 message: "Successfully changed your password!",
                 userId: newUser._id,
                 name: newUser.firstName,
-                dateString
+                dateString,
               });
             })
             .catch((err) => {
@@ -397,19 +383,19 @@ app.post("/contract/contract-purchase", (req, res) => {
             .save()
             .then(() => {
               res.status(200).send({
-                message: "Contract have been successfully purchased",
+                message: "Your investment plan have been successfully purchased.",
               });
             })
             .catch((err) => {
               res.status(500).send({
-                message: "contract was not saved to user",
+                message: "investment plan was not approved. you can try again with correct details",
                 err,
               });
             });
         })
         .catch((err) => {
           return res.status(500).send({
-            message: "User was not found through their id",
+            message: "User not found try again",
             err,
           });
         });
@@ -438,16 +424,16 @@ app.post("/deposits", (req, res) => {
   var minutes = dateObject.getMinutes();
   var ampm = hours >= 12 ? "pm" : "am";
   hours = hours % 12;
-  hours = hours ? hours : 12; 
+  hours = hours ? hours : 12;
   minutes = minutes < 10 ? "0" + minutes : minutes;
   var strTime = hours + ":" + minutes + "" + ampm;
 
   const dateString =
     strTime + " " + day.toString() + " " + editedMonth + ", " + year.toString();
 
-    const amountValue = details.amount;
-    const amountToString = amountValue.toString();
-    const amountWithUSD = "$" + amountToString;
+  const amountValue = details.amount;
+  const amountToString = amountValue.toString();
+  const amountWithUSD = "$" + amountToString;
 
   const deposit = new Deposits({
     userId: details.userId,
@@ -519,9 +505,9 @@ app.post("/withdrawals", (req, res) => {
   const dateString =
     strTime + " " + day.toString() + " " + editedMonth + ", " + year.toString();
 
-    const amountValue = details.amount;
-    const amountToString = amountValue.toString();
-    const amountWithUSD = "$" + amountToString;
+  const amountValue = details.amount;
+  const amountToString = amountValue.toString();
+  const amountWithUSD = "$" + amountToString;
 
   User.findOne({ _id: details.userId })
     .then((user) => {
